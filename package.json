@@ -1,0 +1,27 @@
+{
+  "name": "browserstack-python-extension",
+  "version": "1.0.0",
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "browserstack.createConfig",
+        "title": "Create BrowserStack Configuration"
+      }
+    ]
+  },
+  "activationEvents": [
+    "onCommand:browserstack.createConfig"
+  ],
+  "engines": {
+    "vscode": "^1.60.0"
+  },
+  "scripts": {
+    "compile": "tsc"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.0",
+    "@types/vscode": "^1.60.0",
+    "typescript": "^4.0.0"
+  }
+}
