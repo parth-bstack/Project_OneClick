@@ -5,6 +5,7 @@ import * as vscode from 'vscode';
 
 export function createVirtualEnv(rootPath: string, venvPath: string, callback: (error: Error | null) => void) {
     const createVenvCommand = `python3 -m venv "${venvPath}"`;
+    console.log("VENV" + createVenvCommand)
     cp.exec(createVenvCommand, (error) => {
         if (error) {
             vscode.window.showErrorMessage('Failed to create virtual environment. Please check your Python installation.');

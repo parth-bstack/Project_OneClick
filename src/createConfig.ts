@@ -34,6 +34,7 @@ export function createConfigFile() {
             // Step 1: Check if virtual environment exists
             if (!fs.existsSync(venvPath)) {
                 vscode.window.showInformationMessage('Creating virtual environment...');
+                console.log("VENEVEVEVE"+venvPath)
                 cp.exec(`python3 -m venv "${venvPath}"`, (error, stdout, stderr) => {
                     if (error) {
                         vscode.window.showErrorMessage('Failed to create virtual environment. Please check your Python installation.');
@@ -48,9 +49,14 @@ export function createConfigFile() {
                         ? path.join(venvPath, 'Scripts', 'activate.bat')
                         : path.join(venvPath, 'bin', 'activate');
 
+                        console.log("ACTIVATE" + activateCommand)
+
                     const installCommand = process.platform === 'win32'
                         ? `"${activateCommand}" && pip install browserstack-sdk`
                         : `source "${activateCommand}" && pip install browserstack-sdk`;
+
+                        console.log("INSTALL" + installCommand)
+
 
                     vscode.window.showInformationMessage('Installing BrowserStack SDK...');
                     cp.exec(installCommand, { shell: '/bin/bash' }, (installError, installStdout, installStderr) => {
