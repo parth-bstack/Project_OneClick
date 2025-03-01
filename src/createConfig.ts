@@ -1,3 +1,5 @@
+// NOT REQUIRED ANYMORE
+
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -54,6 +56,7 @@ export function createConfigFile() {
                     const installCommand = process.platform === 'win32'
                         ? `"${activateCommand}" && pip install browserstack-sdk`
                         : `source "${activateCommand}" && pip install browserstack-sdk`;
+                        // : `source "${activateCommand}" && pip install browserstack-sdk==1.24.0`;
 
                         console.log("INSTALL" + installCommand)
 
@@ -61,14 +64,17 @@ export function createConfigFile() {
                     vscode.window.showInformationMessage('Installing BrowserStack SDK...');
                     cp.exec(installCommand, { shell: '/bin/bash' }, (installError, installStdout, installStderr) => {
                         if (installError) {
+                            console.log("INSIDE ERROR OF INSTALL")
                             vscode.window.showErrorMessage('Failed to install BrowserStack SDK. Please check your Python and pip installation.');
                             console.error(`Error installing SDK: ${installStderr}`);
                             return;
                         }
-
+                        
+                        console.log("after exec command")
                         vscode.window.showInformationMessage('BrowserStack SDK installed successfully.');
 
                         // Step 3: Create the browserstack.yml file
+                        console.log("Inside yml")
                         const configContent = `userName: ${username}
 accessKey: ${accessKey}
 platforms:
@@ -103,6 +109,7 @@ consoleLogs: info`;
                     });
                 });
             } else {
+                console.log("Inside Else")
                 vscode.window.showInformationMessage('Virtual environment already exists. Installing BrowserStack SDK...');
 
                 // Step 2: Install BrowserStack SDK if environment exists
@@ -115,15 +122,19 @@ consoleLogs: info`;
                     : `source "${activateCommand}" && pip install browserstack-sdk`;
 
                 cp.exec(installCommand, { shell: '/bin/bash' }, (installError, installStdout, installStderr) => {
+                    console.log("Inside exec command")
                     if (installError) {
+                        console.log("INSIDE ERROR OF INSTALL")
                         vscode.window.showErrorMessage('Failed to install BrowserStack SDK. Please check your Python and pip installation.');
                         console.error(`Error installing SDK: ${installStderr}`);
                         return;
                     }
+                    console.log("Installation successful")
 
                     vscode.window.showInformationMessage('BrowserStack SDK installed successfully.');
 
                     // Step 3: Create the browserstack.yml file
+                    console.log("inside YML in else")
                     const configContent = `userName: ${username}
 accessKey: ${accessKey}
 platforms:

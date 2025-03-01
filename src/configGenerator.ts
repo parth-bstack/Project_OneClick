@@ -1,11 +1,9 @@
-// configGenerator.ts
-import * as fs from 'fs';
-import * as path from 'path';
 import * as vscode from 'vscode';
+import * as fs from 'fs';
 
-export function createConfigFile(rootPath: string, userName: string, accessKey: string) {
-    const configFilePath = path.join(rootPath, 'browserstack.yml');
-    const configContent = `userName: ${userName}
+export function generateConfigFile(configFilePath: string, username: string, accessKey: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+        const configContent = `userName: ${username}
 accessKey: ${accessKey}
 platforms:
   - os: Windows
@@ -28,12 +26,15 @@ debug: true
 networkLogs: true
 consoleLogs: info`;
 
-    fs.writeFile(configFilePath, configContent, (err) => {
-        if (err) {
-            vscode.window.showErrorMessage('Failed to create the browserstack.yml file.');
-            console.error(err);
-            return;
-        }
-        vscode.window.showInformationMessage('browserstack.yml file created successfully!');
+        fs.writeFile(configFilePath, configContent, (err) => {
+            if (err) {
+                vscode.window.showErrorMessage('Failed to create browserstack.yml file.');
+                console.error(`Config File Error: ${err}`);
+                reject(err);
+                return;
+            }
+            vscode.window.showInformationMessage('browserstack.yml file created successfully!');
+            resolve();
+        });
     });
 }
