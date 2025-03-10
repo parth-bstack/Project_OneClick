@@ -1,56 +1,32 @@
-// // sdkInstaller.ts
-// import * as cp from 'child_process';
-import * as path from 'path';
-// import * as vscode from 'vscode';
-
-// export function installSDK(venvPath: string, callback: (error: Error | null) => void) {
-//     const activateCommand = process.platform === 'win32'
-//         ? path.join(venvPath, 'Scripts', 'activate.bat')
-//         : path.join(venvPath, 'bin', 'activate');
-
-//     const installCommand = process.platform === 'win32'
-//         ? `"${activateCommand}" && pip install browserstack-sdk`
-//         : `source "${activateCommand}" && pip install browserstack-sdk`;
-
-//         vscode.window.showInformationMessage('Installing BrowserStack SDK...');
-
-//     cp.exec(installCommand, { shell: '/bin/bash' }, (error, stdout, stderr) => {
-//         if (error) {
-//             console.log("INSIDE ERROR OF INSTALL")
-//             vscode.window.showErrorMessage('Failed to install BrowserStack SDK. Please check your Python and pip installation.');
-//             console.error(`Error installing SDK: ${stderr}`);
-//             callback(error);
-//         } else {
-//             console.log("after exec command")
-//             vscode.window.showInformationMessage('BrowserStack SDK installed successfully.');
-//             callback(null);
-//         }
-//     });
-// }
-
-
 import * as vscode from 'vscode';
 import * as cp from 'child_process';
 
-export function installBrowserStackSDK(venvPath: string): Promise<void> {
-    return new Promise((resolve, reject) => {
-        const activateCommand = process.platform === 'win32'
-            ? `"${venvPath}\\Scripts\\activate.bat"`
-            : `source "${venvPath}/bin/activate"`;
+export async function installSDK(venvPath: string, isAppAutomate: boolean, outputChannel: vscode.OutputChannel, statusBar: vscode.StatusBarItem) {
+    const activateCommand = process.platform === 'win32'
+        ? `"${venvPath}\\Scripts\\activate.bat"`
+        : `source "${venvPath}/bin/activate"`;
 
-        const installCommand = process.platform === 'win32'
-            ? `${activateCommand} && pip install browserstack-sdk`
-            : `${activateCommand} && pip install browserstack-sdk`;
+    let installCommand = `${activateCommand} && pip install browserstack-sdk`;
+    if (isAppAutomate) {
+        installCommand += " Appium-Python-Client";
+    } else {
+        installCommand += " selenium";
+    }
 
-        vscode.window.showInformationMessage('Installing BrowserStack SDK...');
-        cp.exec(installCommand, { shell: '/bin/bash' }, (error, stdout, stderr) => {
-            if (error) {
-                vscode.window.showErrorMessage('Failed to install BrowserStack SDK.');
-                console.error(`SDK Install Error: ${stderr}`);
-                reject(error);
+    outputChannel.appendLine(`📦 Installing ${isAppAutomate ? "BrowserStack SDK & Appium-Python-Client" : "BrowserStack SDK & Selenium"}...`);
+    statusBar.text = "📦 Installing dependencies...";
+
+    return new Promise<void>((resolve, reject) => {
+        cp.exec(installCommand, { shell: process.platform === 'win32' ? 'cmd.exe' : '/bin/bash' }, (installError, stdout, stderr) => {
+            if (installError) {
+                vscode.window.showErrorMessage('Failed to install dependencies.');
+                outputChannel.appendLine(`❌ Error: ${stderr}`);
+                reject(installError);
                 return;
             }
-            vscode.window.showInformationMessage('BrowserStack SDK installed successfully.');
+
+            outputChannel.appendLine("✅ Dependencies installed successfully.");
+            statusBar.text = "✅ SDK Installation Complete";
             resolve();
         });
     });

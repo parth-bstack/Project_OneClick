@@ -1,45 +1,49 @@
-// // venvManager.ts
-// import * as cp from 'child_process';
-// import * as path from 'path';
-// import * as vscode from 'vscode';
-
-// export function createVirtualEnv(rootPath: string, venvPath: string, callback: (error: Error | null) => void) {
-//     const createVenvCommand = `python3 -m venv "${venvPath}"`;
-//     console.log("VENV" + createVenvCommand)
-//     cp.exec(createVenvCommand, (error) => {
-//         if (error) {
-//             vscode.window.showErrorMessage('Failed to create virtual environment. Please check your Python installation.');
-//             console.error(`Error creating venv: ${error.message}`);
-//             callback(error);
-//         } else {
-//             vscode.window.showInformationMessage('Virtual environment created successfully.');
-//             callback(null);
-//         }
-//     });
-// }
-
 import * as vscode from 'vscode';
 import * as cp from 'child_process';
 import * as fs from 'fs';
+import * as path from 'path';
 
-export function createVirtualEnv(venvPath: string): Promise<void> {
-    return new Promise((resolve, reject) => {
-        if (fs.existsSync(venvPath)) {
-            vscode.window.showInformationMessage('Virtual environment already exists.');
-            resolve();
-            return;
-        }
+export async function createVirtualEnv(venvPath: string, outputChannel: vscode.OutputChannel, statusBar: vscode.StatusBarItem) {
+    if (fs.existsSync(venvPath)) {
+        outputChannel.appendLine("✅ Virtual environment already exists.");
+        return;
+    }
 
-        vscode.window.showInformationMessage('Creating virtual environment...');
-        cp.exec(`python3 -m venv "${venvPath}"`, (error, stdout, stderr) => {
+    outputChannel.appendLine("⚙️ Creating virtual environment...");
+    statusBar.text = "⚙️ Creating Virtual Environment...";
+
+    return new Promise<void>((resolve, reject) => {
+        const command = process.platform === 'win32'
+            ? `python -m venv "${venvPath}"`
+            : `python3 -m venv "${venvPath}"`;
+
+        cp.exec(command, (error, stdout, stderr) => {
             if (error) {
                 vscode.window.showErrorMessage('Failed to create virtual environment.');
-                console.error(`Venv Error: ${stderr}`);
+                outputChannel.appendLine(`❌ Error: ${stderr}`);
                 reject(error);
                 return;
             }
-            vscode.window.showInformationMessage('Virtual environment created successfully.');
+
+            outputChannel.appendLine("✅ Virtual environment created successfully.");
+            statusBar.text = "✅ Virtual Environment Ready";
+
+            // 🔹 Auto-activate the virtual environment in the VS Code terminal
+            activateVirtualEnv(venvPath, outputChannel);
+
             resolve();
         });
     });
+}
+
+export function activateVirtualEnv(venvPath: string, outputChannel: vscode.OutputChannel) {
+    const terminal = vscode.window.activeTerminal || vscode.window.createTerminal("Virtual Environment");
+
+    const activateCommand = process.platform === 'win32'
+        ? `"${path.join(venvPath, 'Scripts', 'activate')}"` // Windows activation
+        : `source "${path.join(venvPath, 'bin', 'activate')}"`; // macOS/Linux activation
+
+    outputChannel.appendLine(`🔹 Activating virtual environment: ${activateCommand}`);
+    terminal.sendText(activateCommand);
+    // terminal.show();
 }

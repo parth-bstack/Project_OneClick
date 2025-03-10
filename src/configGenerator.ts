@@ -1,40 +1,43 @@
-import * as vscode from 'vscode';
 import * as fs from 'fs';
+import * as path from 'path';
+import * as vscode from 'vscode';
 
-export function generateConfigFile(configFilePath: string, username: string, accessKey: string): Promise<void> {
-    return new Promise((resolve, reject) => {
-        const configContent = `userName: ${username}
-accessKey: ${accessKey}
-platforms:
-  - os: Windows
-    osVersion: 10
-    browserName: Chrome
-    browserVersion: 120.0
-  - os: OS X
-    osVersion: Monterey
-    browserName: Safari
-    browserVersion: 15.6
-  - deviceName: iPhone 13
-    osVersion: 15
-    browserName: Chromium
-    deviceOrientation: portrait
-browserstackLocal: true
-buildName: bstack-demo
-buildIdentifier: \${BUILD_NUMBER}
-projectName: BrowserStack Sample
-debug: true
-networkLogs: true
-consoleLogs: info`;
+export async function generateConfigFile(
+    rootPath: string,
+    username: string,
+    accessKey: string,
+    isAppAutomate: boolean,
+    outputChannel: vscode.OutputChannel
+) {
+    const configFilePath = path.join(rootPath, 'browserstack.yml');
 
-        fs.writeFile(configFilePath, configContent, (err) => {
-            if (err) {
-                vscode.window.showErrorMessage('Failed to create browserstack.yml file.');
-                console.error(`Config File Error: ${err}`);
-                reject(err);
-                return;
-            }
-            vscode.window.showInformationMessage('browserstack.yml file created successfully!');
-            resolve();
-        });
-    });
+    outputChannel.append("📄 Generating browserstack.yml file...");
+
+    let configData = `userName: ${username}\naccessKey: ${accessKey}\nframework: python\n`;
+
+    if (isAppAutomate) {
+        // App Automate Configuration
+        configData += `app: bs://sample.app\n`;
+        configData += `platforms:\n`;
+        configData += `  - platformName: android\n    deviceName: Samsung Galaxy S22 Ultra\n    platformVersion: 12.0\n`;
+        configData += `  - platformName: android\n    deviceName: Google Pixel 7 Pro\n    platformVersion: 13.0\n`;
+        configData += `  - platformName: android\n    deviceName: OnePlus 9\n    platformVersion: 11.0\n`;
+        configData += `browserstackLocal: true\n`;
+        configData += `buildName: browserstack-build-1\n`;
+        configData += `projectName: BrowserStack Sample\n`;
+    } else {
+        // Automate Configuration (Modify as per your existing setup)
+        configData += `platforms:\n`;
+        configData += `  - browser: chrome\n    browserVersion: latest\n    os: Windows\n    osVersion: 10\n`;
+        configData += `  - browser: firefox\n    browserVersion: latest\n    os: Windows\n    osVersion: 10\n`;
+        configData += `  - browser: edge\n    browserVersion: latest\n    os: Windows\n    osVersion: 10\n`;
+        configData += `browserstackLocal: false\n`;
+        configData += `buildName: browserstack-build-1\n`;
+        configData += `projectName: BrowserStack Sample\n`;
+    }
+
+    // Writing to the file
+    fs.writeFileSync(configFilePath, configData);
+
+    outputChannel.append("\r✅ browserstack.yml file created successfully!\n");
 }
