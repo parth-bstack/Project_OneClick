@@ -12,7 +12,7 @@ Follow these steps to clone the repository, set up the extension, and start usin
 Begin by cloning this repository to your local machine using the following command:
 
 ```
-git clone <repository-url>
+git clone -b working-branch https://github.com/parth-bstack/Project_OneClick.git
 ```
 Replace <repository-url> with the actual URL of this repository.
 
