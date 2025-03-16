@@ -67,10 +67,10 @@ export function activate(context: vscode.ExtensionContext) {
         : `source ${venvPath}/bin/activate`;
 
     outputChannel.appendLine("\n🚀 Setup Complete! You can run your tests using:");
-    outputChannel.appendLine(`  ${activateCmd} && python your_test_script.py`);
+    outputChannel.appendLine(`browserstack-sdk python your_test_script.py`);
 
     // statusBar.text = "✅ Setup Complete!";
-    outputChannel.appendLine("\n🚀 **Run your tests using:**");
+    // outputChannel.appendLine("\n🚀 **Run your tests using:**");
     // outputChannel.appendLine(runCommand);
     outputChannel.appendLine("\n🎉 Setup complete! Happy Testing! 🚀");
 
